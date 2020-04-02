@@ -12,13 +12,13 @@ export class PlayerUtils {
         }
         // if nobody in something messed up
         if (countIn === 0) {
-            throw new ErrorEvent("no players in");
+            throw new Error("no players in");
         }
         return countIn === 1;
     }
 
-    // checks if not every player is done betting (for next cards)
-    notAllSet(Players : Player[]) : boolean {
+    // checks if every player is done betting (for next cards)
+    AllSet(Players : Player[]) : boolean {
         for (const i of Players) {
             if (i.getStatus() === 1 || i.getStatus() === 2) {
                 return false;
@@ -26,6 +26,18 @@ export class PlayerUtils {
         }
         return true;
     }
+
+   // finds the index of the next player's turn or returns that the round is over
+   findNextOrSet(Players : Player[], indexTurn : number) : number {
+       const len = Players.length;
+       for (let i = 0; i < len; i++) {
+           const index = (indexTurn + i) % len;
+           if (Players[index].getStatus() === 1 || Players[index].getStatus() === 2) {
+               return index;
+           }
+       }
+       return -1;
+   } 
 
 
 }

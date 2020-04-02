@@ -1,8 +1,148 @@
 import express, {Request, Response} from "express";
-export const router = express.Router();
+export const gameRouter = express.Router();
+import auth from "../../middleware/auth";
+import {pokerGame} from "../../GameObject";
+import { runInNewContext } from "vm";
+import random from 'random';
+import {check, validationResult} from "express-validator";
+
+
+
+// @route PUT game/startGame
+// @desc starts the game only if done by admin and only if it hasn't been started
+// @access  private
+gameRouter.put('/startGame', auth,  (req : any, res : any) => {
+
+    const name = req.app.locals.payLoad.user.id;
+    if (name !== pokerGame.adminName && pokerGame.isStarted === false) {
+        return res.status(400).send("only the admin can start the game");
+    }
+    // they are the admin so start the game, with the index and everything
+    pokerGame.isStarted = true; // start the game
+    
+    // set the index of the blind and the player's turn to move
+    // pokerGame.indexBlind = random.int(0, pokerGame.players.length - 1);
+    pokerGame.indexBlind = 0;
+
+    pokerGame.handStatus = 0;
+    console.log(pokerGame);
+    return res.status(200).send("yay it worked");
+});
+
+// @route PUT game/startHand
+// @desc starts the hand only if the hand status is zero
+// @access public
+gameRouter.put('/startHand', auth, (req : any, res : any) => {
+    const name = req.app.locals.payLoad.user.id;
+    if (!name) {
+        return res.status(401).send("This token don't work fool");
+    }
+    else if (pokerGame.handStatus !== 0) {
+        return res.this.state(400).send("In the middle of the hand fool");
+    }
+
+    else {
+        // start the game with the update 
+        pokerGame.update();
+        console.log(pokerGame);
+        return res.status(200).json({game : pokerGame});
+    }
+})
+
+
+
 
 // @route GET api/auth
-// @desc Test route
-// add a user to the Game
+// @desc handles call for the user
 // @access  Public or private do they need a token to access route
-router.get('/', (req : any, res : any) => res.send('gameplay route'));
+gameRouter.put('/call', auth,  (req : any, res : any) => {
+    const name = req.app.locals.payLoad.user.id;
+    console.log(name);
+    // make sure the token exists and user's turn
+    if (!name) {
+        return res.status(400).json({error: "jwt not found"});
+    }
+
+    // check not turn 
+    if (name !== pokerGame.players[pokerGame.indexTurn].getName()) {
+        return res.status(401).send("was not your turn");
+    }
+    // check poker game is started
+    if (pokerGame.isStarted === false || pokerGame.handStatus === 0) {
+        return res.status(401).send("game has not been started")
+    }
+    console.log("here");
+    pokerGame.handleCall();
+    console.log(pokerGame);
+    pokerGame.update();
+    console.log(pokerGame);
+    return res.status(200).json({game : pokerGame});
+
+});
+
+
+// @route GET api/auth
+// @desc handles raise for the user
+// @access  Public or private do they need a token to access route
+gameRouter.put('/raise', auth, [
+    check('amount', 'need to send an amount to raise').not().isNumeric()
+], async   (req : any, res : any) => {
+    console.log("here");
+    console.log(req.app.locals.payLoad);
+    const {amount} = req.body;
+    console.log(req.body);
+    console.log(amount);
+    const name = req.app.locals.payLoad.user.id;
+    console.log(name);
+    // make sure the token exists
+    if (!name) {
+        return res.status(400).json({error: "jwt not found"});
+    }
+
+    // check it is their turn
+    if (name !== pokerGame.players[pokerGame.indexTurn].getName()) {
+        return res.status(401).send("was not your turn");
+    }
+
+    // check poker game and hand is started
+    if (pokerGame.isStarted === false || pokerGame.handStatus === 0) {
+        return res.status(401).send("game has not been started")
+    }
+    // check if they have enough chips to raise
+    if (pokerGame.players[pokerGame.indexTurn].hasEnoughChips(pokerGame.maxBet -
+         pokerGame.players[pokerGame.indexTurn].getChipsInHand() + amount) === false) {
+             return res.status(401).send("not enough chips to raise")
+         }
+
+
+    console.log(pokerGame);
+    pokerGame.handleRaise(name);
+    pokerGame.update();
+    return res.status(200).json({game : pokerGame});
+
+});
+
+// @route PUT api/auth
+// @desc handles fold for the user
+// @access  Public or private do they need a token to access route
+gameRouter.put('/fold', auth,  (req : any, res : any) => {
+    const name = req.app.locals.payLoad.user.id;
+    console.log(name);
+    // make sure the token exists and user's turn
+    if (!name) {
+        return res.status(400).json({error: "jwt not found"});
+    }
+    // check not turn 
+    if (name !== pokerGame.players[pokerGame.indexTurn].getName()) {
+        return res.status(401).send("was not your turn");
+    }
+    // check poker game is started
+    if (pokerGame.isStarted === false || pokerGame.handStatus === 0) {
+        return res.status(401).send("game has not been started")
+    }
+    pokerGame.handleFold();
+    pokerGame.update();
+    console.log(pokerGame);
+    return res.status(200).json({game : pokerGame});
+});
+

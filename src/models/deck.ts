@@ -1,5 +1,5 @@
 import {Card} from './card';
-import {Constants} from './constants';
+import {Constants} from '../constants';
 
 export class Deck {
     deck: Card[];

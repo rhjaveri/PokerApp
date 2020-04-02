@@ -8,8 +8,9 @@ const Hand = pokersolver_1.default.Hand;
 class Player {
     // each player is initialized with being the admin or not
     // and the number of chips they are starting out with
-    constructor(isAdmin, chips, tokenID) {
-        this.tokenID = tokenID;
+    constructor(isAdmin, chips, name) {
+        // this.tokenID = tokenID;
+        this.name = name;
         this.isAdmin = isAdmin;
         this.hand = [];
         this.twoCard = [];
@@ -55,7 +56,7 @@ class Player {
     }
     // somehow validate the user taken
     validateUser(token) {
-        return this.tokenID === token;
+        return this.name === token;
     }
     // status: -1 is fold
     // 0 is checked/ has already made their move 
@@ -63,6 +64,7 @@ class Player {
     // 1 needs to call to stay in / does need to put more to stay in
     // -1 is folded
     // 3 is all in baby 
+    // 100 is sitting out
     // folds a player (out of hand)
     fold() {
         this.status = -1;
@@ -103,9 +105,12 @@ class Player {
     getChips() {
         return this.chips;
     }
-    // gets the token ID
-    getToken() {
-        return this.tokenID;
+    // get name
+    getName() {
+        return this.name;
+    }
+    getStringHand() {
+        return this.hand.map(card => card.toString());
     }
 }
 exports.Player = Player;

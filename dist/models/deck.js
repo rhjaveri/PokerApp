@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const card_1 = require("./card");
-const constants_1 = require("./constants");
+const constants_1 = require("../constants");
 class Deck {
     constructor() {
         this.deck = [];

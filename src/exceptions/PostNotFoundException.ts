@@ -5,3 +5,5 @@ class PostNotFoundException extends HttpException {
         super(404, `Post with id ${id} not found`);
     }
 }
+
+export default PostNotFoundException;

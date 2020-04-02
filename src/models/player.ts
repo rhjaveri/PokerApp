@@ -2,14 +2,15 @@ import { Card } from './card';
 import pokersolver from 'pokersolver';
 const Hand = pokersolver.Hand;
 
+
 export class Player {
     isAdmin: boolean;
     hand: Card[];
     twoCard: Card[]
     // handValue: any;
     chips: number;
+    name : any;
     status: number;
-    tokenID: any;
     chipsInHand: number;
     avatar : string // not sure what im using this for
 
@@ -17,8 +18,9 @@ export class Player {
 
     // each player is initialized with being the admin or not
     // and the number of chips they are starting out with
-    constructor(isAdmin: boolean, chips: number, tokenID: any) {
-        this.tokenID = tokenID;
+    constructor(isAdmin: boolean, chips: number, name: any) {
+       // this.tokenID = tokenID;
+        this.name = name;
         this.isAdmin = isAdmin;
         this.hand = [];
         this.twoCard = [];
@@ -72,7 +74,7 @@ export class Player {
 
     // somehow validate the user taken
     validateUser(token: any) : boolean {
-        return this.tokenID === token;
+        return this.name === token;
     }
 
 
@@ -82,6 +84,7 @@ export class Player {
     // 1 needs to call to stay in / does need to put more to stay in
     // -1 is folded
     // 3 is all in baby 
+    // 100 is sitting out
     
     // folds a player (out of hand)
     fold() :void {
@@ -107,6 +110,8 @@ export class Player {
     getStatus() : number {
         return this.status;
     }
+
+
     // does the player have the necessary chips to make bet
     hasEnoughChips(betChips: number) : boolean {
         return this.chips > betChips;
@@ -130,9 +135,13 @@ export class Player {
     getChips() : number {
         return this.chips;
     }
-
-    // gets the token ID
-    getToken() : any {
-        return this.tokenID;
+    // get name
+    getName() : any {
+        return this.name;
     }
+
+    getStringHand() : string[] {
+        return this.hand.map(card => card.toString());
+    }
+        
 }
