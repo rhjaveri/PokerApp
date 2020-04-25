@@ -6,13 +6,17 @@ import {pokerGame} from "../../GameObject";
 import jwt from "jsonwebtoken";
 import { userInfo } from "os";
 import auth from "../../middleware/auth";
+import {APIUtils} from "./APIUtils";
 
-// @route post api/players
+// the util that has the helpers
+const apiUtil = new APIUtils();
+
+// @route post api/players/add
 // @desc Test route
 // add a user to the Game
 // @access  Public or private do they need a token to access route
 // creates a regular player
-playerRouter.post('/', [
+playerRouter.post('/add', [
     check('name', 'Name is required').not().isEmpty(),
     check('chips', 'Please include a number of chips').isNumeric(),
 
@@ -37,7 +41,7 @@ playerRouter.post('/', [
 
         // add the player to the game
         pokerGame.addPlayer(player);
-        console.log(pokerGame.players[0]);
+        console.log(pokerGame.players);
 
         const payload = {
             user:{
@@ -50,7 +54,7 @@ playerRouter.post('/', [
         },
         (err, token) => {
            if (err) throw err;
-           res.json({token});  
+           res.json({token , pokerGame: apiUtil.pokerGameClient(name)});  
         });
         // res.status(200).send("successfully added player");
     }
@@ -85,19 +89,15 @@ playerRouter.post('/admin', [
     }
     console.log(req.body);
     const {name, chips} = req.body;
-    try {
-
-        // check if username is taken
-        const taken = await pokerGame.nameChosen({ name});
-
-        if (taken) {
-            return res.status(400).json({errors: [{msg: 'Username is taken'}]});
-        }
+    try { 
+ 
         const player = new Player(true, chips, name);
 
         // add the player to the game
         pokerGame.addPlayer(player);
         pokerGame.setAdmin(name);
+        console.log(pokerGame.adminName);
+        pokerGame.setBuyIn(chips);
         console.log(pokerGame.adminName);
 
 
@@ -111,10 +111,10 @@ playerRouter.post('/admin', [
             expiresIn:3600
         },
         (err, token) => {
-           if (err) throw err;
-           res.json({token});  
+           if (err) { throw err};
+
+           return res.status(200).json({token , pokerGame: apiUtil.pokerGameClient(name)});  
         });
-        // res.status(200).send("successfully added player");
     }
     catch(err) {
        console.error(err.message);

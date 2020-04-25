@@ -19,12 +19,15 @@ const player_1 = require("../../models/player");
 const GameObject_1 = require("../../GameObject");
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const auth_1 = __importDefault(require("../../middleware/auth"));
-// @route post api/players
+const APIUtils_1 = require("./APIUtils");
+// the util that has the helpers
+const apiUtil = new APIUtils_1.APIUtils();
+// @route post api/players/add
 // @desc Test route
 // add a user to the Game
 // @access  Public or private do they need a token to access route
 // creates a regular player
-exports.playerRouter.post('/', [
+exports.playerRouter.post('/add', [
     express_validator_1.check('name', 'Name is required').not().isEmpty(),
     express_validator_1.check('chips', 'Please include a number of chips').isNumeric(),
 ], (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -44,7 +47,7 @@ exports.playerRouter.post('/', [
         const player = new player_1.Player(false, chips, name);
         // add the player to the game
         GameObject_1.pokerGame.addPlayer(player);
-        console.log(GameObject_1.pokerGame.players[0]);
+        console.log(GameObject_1.pokerGame.players);
         const payload = {
             user: {
                 id: name
@@ -56,7 +59,7 @@ exports.playerRouter.post('/', [
         }, (err, token) => {
             if (err)
                 throw err;
-            res.json({ token });
+            res.json({ token, pokerGame: apiUtil.pokerGameClient(name) });
         });
         // res.status(200).send("successfully added player");
     }
@@ -85,15 +88,12 @@ exports.playerRouter.post('/admin', [
     console.log(req.body);
     const { name, chips } = req.body;
     try {
-        // check if username is taken
-        const taken = yield GameObject_1.pokerGame.nameChosen({ name });
-        if (taken) {
-            return res.status(400).json({ errors: [{ msg: 'Username is taken' }] });
-        }
         const player = new player_1.Player(true, chips, name);
         // add the player to the game
         GameObject_1.pokerGame.addPlayer(player);
         GameObject_1.pokerGame.setAdmin(name);
+        console.log(GameObject_1.pokerGame.adminName);
+        GameObject_1.pokerGame.setBuyIn(chips);
         console.log(GameObject_1.pokerGame.adminName);
         const payload = {
             user: {
@@ -104,11 +104,12 @@ exports.playerRouter.post('/admin', [
         jsonwebtoken_1.default.sign(payload, "mysecrettokoen", {
             expiresIn: 3600
         }, (err, token) => {
-            if (err)
+            if (err) {
                 throw err;
-            res.json({ token });
+            }
+            ;
+            return res.status(200).json({ token, pokerGame: apiUtil.pokerGameClient(name) });
         });
-        // res.status(200).send("successfully added player");
     }
     catch (err) {
         console.error(err.message);

@@ -4,9 +4,12 @@ import express from 'express';
 import pokersolver from 'pokersolver';
 import bodyParser from "body-parser";
 import {playerRouter} from "./routes/api/players"
-import {gameRouter} from "./routes/api/game"
+import {gameRouter} from "./routes/api/game";
+import cors from 'cors';
 
 const app = express();
+
+app.use(cors());
 
 // logger middleware
 function loggerMiddleware(request: express.Request, response: express.Response, next : any) {
@@ -15,10 +18,14 @@ function loggerMiddleware(request: express.Request, response: express.Response, 
 };
 app.use(loggerMiddleware);
 
+
 // Init BodyParser Middleware
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended : false}));
-
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    next();
+  });
 
 app.get('/', (_req: any, res: any) => res.send("API Running"));
 

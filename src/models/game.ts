@@ -4,18 +4,23 @@ import pokersolver from 'pokersolver';
 import { Card } from "./card";
 const Hand = pokersolver.Hand;
 import {PlayerUtils} from "./PlayerUtils";
+import randtoken from 'rand-token'
 const PlayerUtil = new PlayerUtils();
 
+
+// implement reset at the end of the hand instad of the beginning
 export class Game {
+    gameToken : any;
+    buyIn: number;
     adminName: any;
     isStarted: boolean;
     pot: number;
+    tableHand: Card[];
     indexBlind: number;
     indexTurn: number;
     deck: Deck;
     players: Player[];
     blindAmount: number;
-    requestMade: boolean;
     handComplete: boolean;
     maxBet: number;
 
@@ -28,18 +33,20 @@ export class Game {
     handStatus : number;
 
     constructor() {
+        this.buyIn = 0;
         this.isStarted = false;
         this.pot = 0;
         this.indexBlind = 0;
         this.indexTurn = 0;
         this.deck = new Deck();
+        this.tableHand = [];
         this.players = [];
         this.blindAmount = 5;
         this.adminName = null;
         this.handComplete = false;
         this.maxBet= 0;
-        this.requestMade = false;
         this.handStatus = 0;
+        this.gameToken = randtoken.generate(16);
         // isPlayerShowHands = 
     }
 
@@ -54,7 +61,7 @@ export class Game {
         this.indexTurn = (this.indexTurn + 1) % this.players.length;
         let newIndex;
         if (PlayerUtil.allFolded(this.players)) {
-            this.handStatus = 0;
+            this.handStatus = 5;
         }
         switch(this.handStatus) {
         
@@ -121,8 +128,7 @@ export class Game {
                 // set the handstatus to 0, indicating the winners have been handled and the hand is over
                 this.handStatus = 0;
 
-                // set the index of the turn to -1 so nobody can make moves until the next hand maybe wrong way ?
-                this.indexTurn = -1;
+                
 
                 // handle the winners of the hand and wait for someone to say start new hand (emit something from socket)
                 this.handleWinners();
@@ -132,12 +138,21 @@ export class Game {
                 this.indexTurn = newIndex;
             }
             break;
+
+            // everyone has folded 
+        case 5:
+            this.handStatus = 0;
+            this.handleWinners();
+            break;
         }
     }
 
     setAdmin(name : any) : void {
         this.adminName = name;
     }    
+    setBuyIn(amount: number) : void {
+        this.buyIn = amount;
+    }
     // A request to start the game can only be made by admin
      startGameRequest(token: any) : void {
          if (token === this.adminName) {
@@ -173,11 +188,12 @@ export class Game {
         this.deck.clearGenerate();
     }
 
-    // clears the player's deck
+    // clears the player's deck and the table hand
     clearDecks() : void {
         for (const i of this.players) {
             i.clearDeck();
         }
+        this.tableHand = [];
     }
     // clears the chips in the hand for the player
     clearChipsHand() : void {
@@ -208,6 +224,7 @@ export class Game {
 
         // set the player cards
         this.setPlayerCards();
+
 
     }
 
@@ -259,12 +276,14 @@ export class Game {
         const card2 : Card = this.deck.getCard();
         const card3 : Card = this.deck.getCard();
         this.players.forEach(player => player.addFlop(card1, card2, card3));
+        this.tableHand.push(card1, card2, card3);
     }
 
     // sets the river / turn
     setRiverTurn() : void {
         const card : Card = this.deck.getCard();
         this.players.forEach(player => player.addCard(card));
+        this.tableHand.push(card);
     }
 
 
@@ -280,7 +299,7 @@ export class Game {
         this.players[this.indexBlind].payChips(this.blindAmount);
         this.players[this.indexBlind].setChipsInHand(this.blindAmount);
         this.players[this.indexBlind].setStatus(2);
-        this.maxBet += this.blindAmount;
+        this.maxBet = this.blindAmount;
     }
 
 
@@ -298,13 +317,13 @@ export class Game {
             }
 
             // they don't have enough chips... therefore they are going all in
+     
             else {
                 this.pot += player.getChips(); // add whatever chips player has to the pot
                 player.addChipsInHand(player.getChips()); // player has added rest of the chips in hand
                 player.setChips(0); // player now has zero chips
                 player.setStatus(3); // change status to all in
             }
-            this.requestMade = true;
         }
 
 
@@ -332,13 +351,11 @@ export class Game {
                         // do nothing... they're in correct status
                     }
                 }
-                this.requestMade = true; // set the requestMade status to true
         }
 
     handleFold() : void {
-            const player = this.players[this.indexTurn];
-            player.setStatus(-1);
-            this.requestMade = true;
+        this.players[this.indexTurn].setStatus(-1);
+        console.log( this.players[this.indexTurn]);
         }
 
     // sleeps while waiting for a move to be made
@@ -346,43 +363,12 @@ export class Game {
     new Promise((resolve) => setTimeout(resolve, ms));
     
 
-    // place the bets for the turn
-    async placeBetsTurn() {
-        // while not players are checked set or folded
-        while (PlayerUtil.AllSet(this.players) === false) {
-            const player = this.players[(this.indexTurn)];
-
-            // if they are checked and need to recheck or need to call
-            if (player.getStatus() === 2 || player.getStatus() === 1) {
-                while (this.requestMade === false) {
-                    await this.sleep(50);
-                }
-                // set it back to false for the rest of the loop
-                this.requestMade = false;
-                
-                // if everyone folded after this turn handle the winners
-                if (PlayerUtil.allFolded(this.players)) {
-                    this.handleWinners();
-                    break;
-                }
-            }
-
-            this.indexTurn = (this.indexTurn + 1) % this.players.length; // change the turn after the player moves
-        }
-
-    }
-
-    // check if there is a winner, and if there is, invokes the end of hand stuff
-    // checkWinner() : boolean {
-    // }
-
-
 
     // handles the winners by adding the chips to their pile and cleaning the winners array
     handleWinners() : void {
-        const winners = []
+        let winners = []
         for (const i of this.players) {
-            if (i.getStatus() === 3 || i.getStatus() === 0) {
+            if (i.getStatus() === 3 || i.getStatus() === 0 || i.getStatus() === 1 || i.getStatus() === 2 ) {
                 winners.push(i);
             }
         }
@@ -391,6 +377,7 @@ export class Game {
         // if there is only one winner he gets the entire pot... that's all that happens
         if (winners.length === 1) {
             winners[0].addChips(this.pot);
+            this.pot = 0;
             return;
         }
 
@@ -407,13 +394,16 @@ export class Game {
         while (winners.length > 1) {
             // get the indices of all the winning hands
             winnerIndexes = this.getWinnerInd(winners);
+            console.log(winnerIndexes);
             // get the winning players from the indices
             const winningHands : Player[] = [];
             for (const i of winnerIndexes) {
                 winningHands.push(winners[i]);
             }
+            console.log(winningHands);
             // now you have the winning players in a list 
             const minVal = Math.min.apply(Math, winningHands.map(p => { return p.getChipsInHand();}))
+            console.log(minVal);
             let sidepot = 0;
             // subtract from each player's pot depending on how much they have
             for (const j of this.players) {
@@ -421,20 +411,24 @@ export class Game {
                     sidepot += j.getChipsInHand();
                     this.pot -= j.getChipsInHand();
                     j.chipsInHand = 0;
+                    console.log(j);
                 }
                 else {
                     sidepot += minVal;
                     this.pot -= minVal;
                     j.chipsInHand -= minVal;
+                    console.log(j);
                 }
             }
             // split the sidepot between the winners
             const sidePotSplit = sidepot / winningHands.length;
             winningHands.forEach(e => {
                 e.addChips(sidePotSplit);
+                console.log(e);
             })
             // get rid of the sidepots 
-            winners.filter(p => p.getChipsInHand() > 0);
+            winners = winners.filter(p => p.getChipsInHand() > 0);
+            console.log(winners);
         }
         // should never hit this point
         if (winners.length === 1) {
