@@ -14,6 +14,15 @@ Current Progress:
 Currently, there is only support for playing a single game. 
 The application supports up to 6 users on a single table with real-time communication from the server to each client through Socket.io
 
+<br />
+To run app locally: <br />
+Download repository and unzip <br />
+run npm install in the master folder <br />
+run npm start to start the server <br />
+in another terminal cd into the client and run npm install <br />
+Run npm start in the client to start the client
+
+
 If no user has created a game, the first client will be presented with the screen <br />
 <img src="https://github.com/rhjaveri/PokerApp/blob/master/Screen%20Shot%202020-04-27%20at%203.44.21%20AM.png" width="600" height="400"> <br />
 
