@@ -32,3 +32,4 @@ The functionality of the pokerGame is is then intuitive, allowing only the admin
 TODO: 
 fix the functionality for refreshing to saved game (player token is lost)
 add database support so that several games can be be player simultaneously
+Fix the UI so that the empty (representing an empty seat at the table) fits within the board
