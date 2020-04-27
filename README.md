@@ -19,7 +19,7 @@ If no user has created a game, the first client will be presented with the scree
 
 Every client that accesses the game after the admin has created the game will be presented with the screen <br />
 
-<img src="https://github.com/rhjaveri/PokerApp/blob/master/Screen%20Shot%202020-04-27%20at%203.44.41%20AM.png" width="500" height="400"> <br />
+<img src="https://github.com/rhjaveri/PokerApp/blob/master/Screen%20Shot%202020-04-27%20at%203.44.41%20AM.png" width="600" height="400"> <br />
 
 The functionality of the pokerGame is is then intuitive, allowing only the admin to start the game once all the users have entered.
 
