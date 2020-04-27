@@ -16,4 +16,4 @@ The application supports up to 6 users on a single table with real-time communic
 
 If no user has created a game, the first client will be presented with the screen
 
-![Alt text](https://github.com/rhjaveri/PokerApp/blob/master/Screen%20Shot%202020-04-27%20at%203.44.21%20AM.png) {:height="50%" width="50%"}
+![test image size](https://github.com/rhjaveri/PokerApp/blob/master/Screen%20Shot%202020-04-27%20at%203.44.21%20AM.png) {:height="50%" width="50%"}
