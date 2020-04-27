@@ -1,6 +1,8 @@
 import React from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import { Html5Entities } from 'html-entities';
+import Typography from '@material-ui/core/Typography';
+
 
 // displays each individual card on the table
 const useStyles = makeStyles({
@@ -39,15 +41,24 @@ const useStyles = makeStyles({
       
   })
 
-  const HiddenCard = () => {
+  const HiddenCard = ({name, chips}) => {
       console.log("hidden");
     const htmlEntities = new Html5Entities();
     const classes = useStyles();
 
     return (
+    <div>
+      <Typography variant="h6" gutterBottom>
+          {name} : {chips} chips
+      </Typography>
     <div className={classes.cardSmall}>
     <p className={[classes.cardText, classes.black]}>?</p>
     <p className={[classes.cardImg, classes.black]}></p>
+  </div>
+  <div className={classes.cardSmall}>
+    <p className={[classes.cardText, classes.black]}>?</p>
+    <p className={[classes.cardImg, classes.black]}></p>
+  </div>
   </div>
     )
 }

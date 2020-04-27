@@ -7,6 +7,7 @@ import { runInNewContext } from "vm";
 import random from 'random';
 import {check, validationResult} from "express-validator";
 import {APIUtils} from "./APIUtils";
+import {io} from "../../index";
 
 // the util that has the helpers
 const apiUtil = new APIUtils();
@@ -48,7 +49,8 @@ gameRouter.get('/startGame', auth,  (req : any, res : any) => {
     pokerGame.indexBlind = 0;
 
     pokerGame.handStatus = 0;
-    console.log(pokerGame);
+    console.log(pokerGame.gameToken);
+    io.sockets.emit("game", apiUtil.pokerGameClient(name));
     return res.status(200).json({game: apiUtil.pokerGameClient(name)});
 });
 
@@ -67,7 +69,9 @@ gameRouter.get('/startHand', auth, (req : any, res : any) => {
     else {
         // start the game with the update 
         pokerGame.update();
+        console.log("handStatus" + pokerGame.handStatus);
         console.log(pokerGame);
+        io.sockets.emit('game', apiUtil.pokerGameClient(name));
         return res.status(200).json({game: apiUtil.pokerGameClient(name)});
     }
 })
@@ -78,7 +82,7 @@ gameRouter.get('/startHand', auth, (req : any, res : any) => {
 // @route GET api/auth
 // @desc handles call for the user
 // @access  Public or private do they need a token to access route
-gameRouter.put('/call', auth,  (req : any, res : any) => {
+gameRouter.get('/call', auth,  (req : any, res : any) => {
     const name = req.app.locals.payLoad.user.id;
     console.log(name);
     // make sure the token exists and user's turn
@@ -99,7 +103,8 @@ gameRouter.put('/call', auth,  (req : any, res : any) => {
     console.log(pokerGame);
     pokerGame.update();
     console.log(pokerGame);
-    return res.status(200).json({game : pokerGame});
+    io.sockets.emit('game', apiUtil.pokerGameClient(name));
+    return res.status(200).json({game : apiUtil.pokerGameClient(name)});
 
 });
 
@@ -107,11 +112,13 @@ gameRouter.put('/call', auth,  (req : any, res : any) => {
 // @route GET api/auth
 // @desc handles raise for the user
 // @access  Public or private do they need a token to access route
-gameRouter.put('/raise', auth, [
+gameRouter.post('/raise', auth, [
     check('amount', 'need to send an amount to raise').not().isNumeric()
 ], async   (req : any, res : any) => {
+    console.log("in raise");
     console.log(req.app.locals.payLoad);
     const amount = req.body.amount;
+    console.log(amount);
     console.log(amount);
     const name = req.app.locals.payLoad.user.id;
     console.log(name);
@@ -142,14 +149,15 @@ gameRouter.put('/raise', auth, [
     console.log(pokerGame);
     pokerGame.handleRaise(amount);
     pokerGame.update();
-    return res.status(200).json({game : pokerGame});
+    io.sockets.emit('game', apiUtil.pokerGameClient(name));
+    return res.status(200).json({game : apiUtil.pokerGameClient(name)});
 
 });
 
 // @route PUT api/auth
 // @desc handles fold for the user
 // @access  Public or private do they need a token to access route
-gameRouter.put('/fold', auth,  (req : any, res : any) => {
+gameRouter.get('/fold', auth,  (req : any, res : any) => {
     const name = req.app.locals.payLoad.user.id;
     console.log(name);
     // make sure the token exists and user's turn
@@ -167,7 +175,8 @@ gameRouter.put('/fold', auth,  (req : any, res : any) => {
     pokerGame.handleFold();
     pokerGame.update();
     console.log(pokerGame);
-    return res.status(200).json({game : pokerGame});
+    io.sockets.emit('game', apiUtil.pokerGameClient(name));
+    return res.status(200).json({game : apiUtil.pokerGameClient(name)});
 });
 
 // @route GET api/board
@@ -176,6 +185,24 @@ gameRouter.get('/board', (req : any, res : any) => {
     console.log(apiUtil.pokerGameBoard());
     return res.status(200).json({game: apiUtil.pokerGameBoard()});
 });
+
+gameRouter.get('/checkIn', auth, (req : any, res : any) => {
+    const name = req.app.locals.payLoad.user.id;
+    console.log(name);
+    // make sure the token exists and user's turn
+    if (!name) {
+        return res.status(400).json({error: "jwt not found"});
+    }
+    if (pokerGame.getPlayerByName(name) === null) {
+        return res.status(200).send(false);
+    }
+    else {
+        return res.status(200).send(true);
+    }
+ 
+});
+
+
 
 
 

@@ -5,6 +5,8 @@ import Typography from '@material-ui/core/Typography';
 import Button from '@material-ui/core/Button';
 import axios from 'axios';
 import GameBoard from '../GameBoard';
+import { Redirect } from 'react-router';
+
 
 
 
@@ -36,6 +38,10 @@ const PlayerLanding = () => {
                   type: "SETUSER",
                   payload: data,
               });
+              dispatch({
+                type: "SETNAME",
+                payload: name,
+              });
               // after dispatch is done, send them to the table
               }).then(response => {
                 setLoading(2);
@@ -51,7 +57,10 @@ const PlayerLanding = () => {
           }
 
           if (Loading === 2) {
-            return <GameBoard />
+            dispatch({
+              type: "SETCHECKED",
+              payload: true,
+          });
           }
 
     // render

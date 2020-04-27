@@ -6,6 +6,7 @@ import {PokerContext} from '../DrawPokerContext';
 import HiddenCard from './hiddenCard';
 import Typography from '@material-ui/core/Typography';
 import Card from './Card';
+import { classicNameResolver } from 'typescript';
 
 const PlayerCard = ({index}) => {
     const htmlEntities = new Html5Entities();
@@ -27,9 +28,9 @@ const PlayerCard = ({index}) => {
         if (state.pokerGame.players[index].twoCard && state.pokerGame.players[index].twoCard !== []) {
             //console.log(html);
             return (
-                <div>
-                <Typography variant="h5" gutterBottom>
-                {state.pokerGame.players[index].name}
+                <div  style={{ boxShadow: "0 0 10px white"}}>
+                <Typography variant="h6" gutterBottom>
+                {state.pokerGame.players[index].name} :  {state.pokerGame.players[index].chips} chips 
             </Typography>
             <div>
                 {state.pokerGame.players[index].twoCard.map((item) => (
@@ -42,7 +43,7 @@ const PlayerCard = ({index}) => {
 
         // if their cards are hidden show the hidden Card
         else {
-            return <HiddenCard />
+            return <HiddenCard name = {state.pokerGame.players[index].name} chips = {state.pokerGame.players[index].chips} />
         }
     }
     // return some kinda weird picture showing nobody is there

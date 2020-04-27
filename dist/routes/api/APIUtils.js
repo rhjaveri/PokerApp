@@ -54,16 +54,22 @@ class APIUtils {
     }
     // Creates the pokerGame object to send to the client
     pokerGameClient(name) {
+        if (GameObject_1.pokerGame.getPlayerByName(name) === null) {
+            return {};
+        }
         return {
+            myChips: GameObject_1.pokerGame.getPlayerByName(name).getChips(),
+            playerStatus: GameObject_1.pokerGame.getPlayerByName(name).getStatus(),
             isAdmin: GameObject_1.pokerGame.adminName === name,
+            indexTurn: GameObject_1.pokerGame.indexTurn,
             adminName: GameObject_1.pokerGame.adminName,
             handStatus: GameObject_1.pokerGame.handStatus,
             gameToken: GameObject_1.pokerGame.gameToken,
             buyIn: GameObject_1.pokerGame.buyIn,
             isStarted: GameObject_1.pokerGame.isStarted,
             pot: GameObject_1.pokerGame.pot,
+            maxBet: GameObject_1.pokerGame.maxBet,
             tableHand: GameObject_1.pokerGame.tableHand,
-            isTurn: this.makeIsTurn(name),
             players: this.makePlayers(name),
             toCall: this.makeToCall(name)
         };
@@ -74,6 +80,7 @@ class APIUtils {
             adminName: GameObject_1.pokerGame.adminName,
             gameToken: GameObject_1.pokerGame.gameToken,
             buyIn: GameObject_1.pokerGame.buyIn,
+            maxBet: GameObject_1.pokerGame.maxBet,
             isStarted: GameObject_1.pokerGame.isStarted,
             pot: GameObject_1.pokerGame.pot,
             tableHand: GameObject_1.pokerGame.tableHand,

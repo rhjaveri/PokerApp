@@ -40,11 +40,14 @@ class Game {
     update() {
         this.indexTurn = (this.indexTurn + 1) % this.players.length;
         let newIndex;
-        if (PlayerUtil.allFolded(this.players)) {
+        if (PlayerUtil.allFolded(this.players) && this.handStatus !== 0) {
             this.handStatus = 5;
         }
+        console.log("in update");
+        console.log(this.handStatus);
         switch (this.handStatus) {
             case 0:
+                console.log("in zero");
                 this.resetHand();
                 this.handStatus = 1;
                 break;
@@ -140,6 +143,7 @@ class Game {
                 return i;
             }
         }
+        return null;
     }
     // checks if this name has been chosen yet
     nameChosen(arg0) {
@@ -309,6 +313,9 @@ class Game {
         // if there is only one winner he gets the entire pot... that's all that happens
         if (winners.length === 1) {
             winners[0].addChips(this.pot);
+            for (const p of this.players) {
+                p.chipsInHand = 0;
+            }
             this.pot = 0;
             return;
         }

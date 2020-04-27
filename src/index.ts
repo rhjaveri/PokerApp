@@ -1,3 +1,5 @@
+import { pokerGame } from './gameObject';
+import {Game} from './models/game';
 import { Card } from './models/card';
 import {Player } from './models/player';
 import express from 'express';
@@ -6,8 +8,17 @@ import bodyParser from "body-parser";
 import {playerRouter} from "./routes/api/players"
 import {gameRouter} from "./routes/api/game";
 import cors from 'cors';
+import socketio from "socket.io";
+import http from "http";
+
 
 const app = express();
+app.set("port", process.env.PORT || 5000);
+
+const server = new http.Server(app);
+export const io = socketio(server);
+
+
 
 app.use(cors());
 
@@ -30,11 +41,29 @@ app.use((req, res, next) => {
 app.get('/', (_req: any, res: any) => res.send("API Running"));
 
 
+
 // Define Routes
  app.use('/api/game', gameRouter);
  app.use('/api/players', playerRouter);
 
+
+//  export function emitGame (game : any) : any {
+//    console.log("here");
+//   io.sockets.emit('game', game);
+//  }
+
+
+// whenever a user connects on port 3000 via
+// a websocket, log that a user has connected
+io.on("connection", (socket: any) => {
+  console.log("a user connected");
+});
+
 const PORT = 5000;
 
-app.listen(PORT, () => console.log(`Server has started on port ${PORT}`));
+server.listen(5000, () => {
+  console.log("listening on *:3000");
+});
+
+// app.listen(PORT, () => console.log(`Server has started on port ${PORT}`));
 

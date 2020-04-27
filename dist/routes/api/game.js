@@ -18,6 +18,7 @@ const auth_1 = __importDefault(require("../../middleware/auth"));
 const GameObject_1 = require("../../GameObject");
 const express_validator_1 = require("express-validator");
 const APIUtils_1 = require("./APIUtils");
+const index_1 = require("../../index");
 // the util that has the helpers
 const apiUtil = new APIUtils_1.APIUtils();
 // @route GET game/playerBoard
@@ -48,7 +49,8 @@ exports.gameRouter.get('/startGame', auth_1.default, (req, res) => {
     // pokerGame.indexBlind = random.int(0, pokerGame.players.length - 1);
     GameObject_1.pokerGame.indexBlind = 0;
     GameObject_1.pokerGame.handStatus = 0;
-    console.log(GameObject_1.pokerGame);
+    console.log(GameObject_1.pokerGame.gameToken);
+    index_1.io.sockets.emit("game", apiUtil.pokerGameClient(name));
     return res.status(200).json({ game: apiUtil.pokerGameClient(name) });
 });
 // @route PUT game/startHand
@@ -65,14 +67,16 @@ exports.gameRouter.get('/startHand', auth_1.default, (req, res) => {
     else {
         // start the game with the update 
         GameObject_1.pokerGame.update();
+        console.log("handStatus" + GameObject_1.pokerGame.handStatus);
         console.log(GameObject_1.pokerGame);
+        index_1.io.sockets.emit('game', apiUtil.pokerGameClient(name));
         return res.status(200).json({ game: apiUtil.pokerGameClient(name) });
     }
 });
 // @route GET api/auth
 // @desc handles call for the user
 // @access  Public or private do they need a token to access route
-exports.gameRouter.put('/call', auth_1.default, (req, res) => {
+exports.gameRouter.get('/call', auth_1.default, (req, res) => {
     const name = req.app.locals.payLoad.user.id;
     console.log(name);
     // make sure the token exists and user's turn
@@ -92,16 +96,19 @@ exports.gameRouter.put('/call', auth_1.default, (req, res) => {
     console.log(GameObject_1.pokerGame);
     GameObject_1.pokerGame.update();
     console.log(GameObject_1.pokerGame);
-    return res.status(200).json({ game: GameObject_1.pokerGame });
+    index_1.io.sockets.emit('game', apiUtil.pokerGameClient(name));
+    return res.status(200).json({ game: apiUtil.pokerGameClient(name) });
 });
 // @route GET api/auth
 // @desc handles raise for the user
 // @access  Public or private do they need a token to access route
-exports.gameRouter.put('/raise', auth_1.default, [
+exports.gameRouter.post('/raise', auth_1.default, [
     express_validator_1.check('amount', 'need to send an amount to raise').not().isNumeric()
 ], (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    console.log("in raise");
     console.log(req.app.locals.payLoad);
     const amount = req.body.amount;
+    console.log(amount);
     console.log(amount);
     const name = req.app.locals.payLoad.user.id;
     console.log(name);
@@ -126,12 +133,13 @@ exports.gameRouter.put('/raise', auth_1.default, [
     console.log(GameObject_1.pokerGame);
     GameObject_1.pokerGame.handleRaise(amount);
     GameObject_1.pokerGame.update();
-    return res.status(200).json({ game: GameObject_1.pokerGame });
+    index_1.io.sockets.emit('game', apiUtil.pokerGameClient(name));
+    return res.status(200).json({ game: apiUtil.pokerGameClient(name) });
 }));
 // @route PUT api/auth
 // @desc handles fold for the user
 // @access  Public or private do they need a token to access route
-exports.gameRouter.put('/fold', auth_1.default, (req, res) => {
+exports.gameRouter.get('/fold', auth_1.default, (req, res) => {
     const name = req.app.locals.payLoad.user.id;
     console.log(name);
     // make sure the token exists and user's turn
@@ -149,12 +157,27 @@ exports.gameRouter.put('/fold', auth_1.default, (req, res) => {
     GameObject_1.pokerGame.handleFold();
     GameObject_1.pokerGame.update();
     console.log(GameObject_1.pokerGame);
-    return res.status(200).json({ game: GameObject_1.pokerGame });
+    index_1.io.sockets.emit('game', apiUtil.pokerGameClient(name));
+    return res.status(200).json({ game: apiUtil.pokerGameClient(name) });
 });
 // @route GET api/board
 // handles getting the game board for a user at any point
 exports.gameRouter.get('/board', (req, res) => {
     console.log(apiUtil.pokerGameBoard());
     return res.status(200).json({ game: apiUtil.pokerGameBoard() });
+});
+exports.gameRouter.get('/checkIn', auth_1.default, (req, res) => {
+    const name = req.app.locals.payLoad.user.id;
+    console.log(name);
+    // make sure the token exists and user's turn
+    if (!name) {
+        return res.status(400).json({ error: "jwt not found" });
+    }
+    if (GameObject_1.pokerGame.getPlayerByName(name) === null) {
+        return res.status(200).send(false);
+    }
+    else {
+        return res.status(200).send(true);
+    }
 });
 //# sourceMappingURL=game.js.map

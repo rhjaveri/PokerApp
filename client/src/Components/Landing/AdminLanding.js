@@ -38,9 +38,16 @@ const AdminLanding = () => {
           type: "SETUSER",
           payload: data,
       });
+      dispatch({
+        type: "SETNAME",
+        payload: name,
+    })
       // after dispatch is done, send them to the table
       }).then(response => {
-        setLoading(2);
+        dispatch({
+          type: "SETCHECKED",
+          payload: true,
+      });
       }).catch(error => {
         setErrorText(error);
         //return "didn't work";
@@ -107,9 +114,6 @@ const AdminLanding = () => {
     return "Loading";
   }
   
-  if (Loading === 2) {
-    return <Redirect push to="/board" />;
-  }
 
 };
 export default AdminLanding;

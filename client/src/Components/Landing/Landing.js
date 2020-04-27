@@ -3,6 +3,7 @@ import {PokerContext} from '../../DrawPokerContext';
 import PlayerLanding from './PlayerLanding';
 import AdminLanding from './AdminLanding';
 import GameBoard from '../GameBoard';
+import { Redirect } from 'react-router';
 import axios from 'axios';
 import { StatusTypes } from 'react-async';
 
@@ -38,21 +39,20 @@ if (error) {
     return "error";
 }
 
-if (state.userLoaded === true) {
-    return <GameBoard />;
-}
+// if (state.userLoaded === true) {
+//     return <GameBoard />;
+// }
 
-// if they are already logged in dispatch the new game state.
-// console.log(props.gameToken);
-// console.log(state.pokerGame.gameToken);
-console.log(state.pokerGame.gameToken === props.gameToken);
-if (state.token !== false && state.pokerGame.gameToken === props.gameToken && Loading === false) {
-    return <GameBoard />
-}
+// // if they are already logged in dispatch the new game state.
+// // console.log(props.gameToken);
+// // console.log(state.pokerGame.gameToken);
+// console.log(state.pokerGame.gameToken === props.gameToken);
+// if (state.token !== false && state.pokerGame.gameToken === props.gameToken && Loading === false) {
+//     return <GameBoard />
+// }
 
 // if there is no admin in the game
 else {
-    console.log(state.pokerGame.adminName);
     if (state.pokerGame.adminName !== null) {
         return <PlayerLanding />; 
     }

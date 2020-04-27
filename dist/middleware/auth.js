@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const authMiddleware = (req, res, next) => {
     // Get the jwt token from the head
-    console.log("token" + req.headers["x-auth-token"]);
+    console.log(req.body);
     const token = req.headers["x-auth-token"];
     if (!token) {
         return res.status(401).json({ msg: "no token" });

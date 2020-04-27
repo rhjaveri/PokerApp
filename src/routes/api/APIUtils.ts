@@ -50,16 +50,22 @@ makeToCall(name: any) {
 
 // Creates the pokerGame object to send to the client
 pokerGameClient(name: any) {
+    if (pokerGame.getPlayerByName(name) === null) {
+        return {};
+    }
     return {
+        myChips: pokerGame.getPlayerByName(name).getChips(),
+        playerStatus: pokerGame.getPlayerByName(name).getStatus(),
         isAdmin : pokerGame.adminName === name,
+        indexTurn: pokerGame.indexTurn,
         adminName : pokerGame.adminName,
         handStatus: pokerGame.handStatus, 
         gameToken : pokerGame.gameToken,
         buyIn: pokerGame.buyIn,
         isStarted : pokerGame.isStarted,
         pot: pokerGame.pot,
+        maxBet : pokerGame.maxBet,
         tableHand: pokerGame.tableHand,
-        isTurn: this.makeIsTurn(name),
         players: this.makePlayers(name),
         toCall: this.makeToCall(name)
     }
@@ -71,6 +77,7 @@ pokerGameBoard() {
         adminName : pokerGame.adminName,
         gameToken : pokerGame.gameToken,
         buyIn: pokerGame.buyIn,
+        maxBet: pokerGame.maxBet,
         isStarted : pokerGame.isStarted,
         pot: pokerGame.pot,
         tableHand: pokerGame.tableHand,

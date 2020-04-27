@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 
 const authMiddleware = (req: Request, res : Response, next : any) => {
    // Get the jwt token from the head
-   console.log("token" + req.headers["x-auth-token"]);
+   console.log(req.body);
   const token = req.headers["x-auth-token"] as string;
 
   if (!token) {
