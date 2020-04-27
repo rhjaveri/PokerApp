@@ -26,3 +26,9 @@ The functionality of the pokerGame is is then intuitive, allowing only the admin
 
 <img src="https://github.com/rhjaveri/PokerApp/blob/master/Screen%20Shot%202020-04-27%20at%203.43.05%20AM.png" width="900" height="500"> <br />
 
+<br />
+<br />
+<br />
+TODO: 
+fix the functionality for refreshing to saved game (player token is lost)
+add database support so that several games can be be player simultaneously
