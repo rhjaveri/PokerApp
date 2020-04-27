@@ -15,11 +15,11 @@ Currently, there is only support for playing a single game.
 The application supports up to 6 users on a single table with real-time communication from the server to each client through Socket.io
 
 If no user has created a game, the first client will be presented with the screen <br />
-<img src="https://github.com/rhjaveri/PokerApp/blob/master/Screen%20Shot%202020-04-27%20at%203.44.21%20AM.png" width="700" height="500"> <br />
+<img src="https://github.com/rhjaveri/PokerApp/blob/master/Screen%20Shot%202020-04-27%20at%203.44.21%20AM.png" width="800" height="500"> <br />
 
 Every client that accesses the game after the admin has created the game will be presented with the screen <br />
 
-<img src="https://github.com/rhjaveri/PokerApp/blob/master/Screen%20Shot%202020-04-27%20at%203.44.41%20AM.png" width="700" height="500"> <br />
+<img src="https://github.com/rhjaveri/PokerApp/blob/master/Screen%20Shot%202020-04-27%20at%203.44.41%20AM.png" width="800" height="500"> <br />
 
 The functionality of the pokerGame is is then intuitive, allowing only the admin to start the game once all the users have entered.
 
